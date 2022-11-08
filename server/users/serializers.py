@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import User
+from .models import TokensTable, User
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -21,4 +21,13 @@ class AuthUserSerializer(serializers.ModelSerializer):
             'username',
             'email',
             'password'
+        ]
+
+
+class TokenSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TokensTable
+        fields = [
+            'userid',
+            'resetToken',
         ]

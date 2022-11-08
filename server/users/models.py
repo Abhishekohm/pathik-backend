@@ -1,21 +1,22 @@
-from django.db import models
-import jwt
 from datetime import datetime, timedelta
+
+import jwt
+from django.db import models
 
 # Create your models here.
 
 
 class User(models.Model):
     username = models.CharField(max_length=50, unique=True)
-    email = models.CharField(max_length=150, unique=True, blank=True)
+    email = models.CharField(max_length=150, unique=True)
     password = models.CharField(max_length=255)
-    refreshToken = models.CharField(max_length=255)
+    refreshToken = models.CharField(max_length=255, unique=True, blank=True)
     createdOn = models.TimeField(auto_now_add=True)
 
     def getAccessToken(self):
         payload = {
             'id': self.id,
-            'exp': datetime.utcnow() + timedelta(minutes=60)
+            'exp': datetime.utcnow() + timedelta(minutes=30)
         }
         # create a environment variable for secret
         jwt_token = jwt.encode(payload, 'secret', algorithm="HS256")
@@ -34,7 +35,7 @@ class User(models.Model):
     def getPasswordRefreshToken(self):
         payload = {
             'id': self.id,
-            'exp': datetime.utcnow() + timedelta(minutes=30)
+            'exp': datetime.utcnow() + timedelta(minutes=1)
         }
         reset_token = jwt.encode(payload, self.password, algorithm="HS256")
         # self.

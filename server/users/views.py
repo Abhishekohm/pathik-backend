@@ -1,17 +1,19 @@
-from tkinter.messagebox import RETRY
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from django.contrib.auth.hashers import make_password, check_password
-from rest_framework.exceptions import AuthenticationFailed, NotFound
-from .models import User, TokensTable
-from .serializers import UserSerializer, AuthUserSerializer
-from .decorators import login_required
 import jwt
-from .utils import send_passwordreset_email
+from django.contrib import messages
+from django.contrib.auth.hashers import check_password, make_password
 from django.db.models import Q
+from django.db.utils import IntegrityError
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib import messages
+from rest_framework.decorators import api_view
+from rest_framework.exceptions import AuthenticationFailed, NotFound
+from rest_framework.response import Response
+
+from .decorators import login_required
+from .models import TokensTable, User
+from .serializers import AuthUserSerializer, TokenSerializer, UserSerializer
+from .utils import send_passwordreset_email
+
 # Create your views here.
 
 
@@ -57,10 +59,16 @@ def register(request):
     email = request.data.get('email')
     if username is None or password is None or email is None:
         raise AuthenticationFailed(code=401)
+    # IntegrityError
+    try:
+        instance = User(username=username, email=email)
+        instance.password = make_password(password)
+        instance.save()
+    except IntegrityError:
+        return Response(status=406)
+    except:
+        return Response(status=500)
 
-    instance = User(username=username, email=email)
-    instance.password = make_password(password)
-    instance.save()
     user = UserSerializer(instance).data
     access_token = instance.getAccessToken()
     refresh_token = instance.getRefreshToken()
@@ -120,34 +128,64 @@ def refresh(request):
 @api_view(['POST', 'GET'])
 def reset_password(request, token, userId):
     if request.method == "POST":
-        # username = request.data.get('username')
-        # email = request.data.get('email')
+        user = User.objects.filter(id=userId).first()
+        claimedUser = TokensTable.objects.filter(resetToken=token).first()
 
-        # user = User.objects.filter(
-        #     Q(username=username) | Q(email=email)).first()
-        # if user is None:
-        #     raise NotFound(code=404)
+        if user is None:
+            raise NotFound(code=404)
 
-        # serialized_user = UserSerializer(user).data
-        # reset_token = user.getPasswordRefreshToken()
-        # print(reset_token)
+        if claimedUser is None:
+            raise NotFound(code=400)
 
-        # send_passwordreset_email(serialized_user.get('email'), reset_token)
+        serializedClaimedUser = TokenSerializer(claimedUser).data
+        serializedUser = AuthUserSerializer(user).data
+        password1 = request.POST.get('password1')
+        password2 = request.POST.get('password2')
 
-        print(request.POST.get('password1'))
-        print(request.POST.get('password2'))
-        # me = messages.error(request, "Password not matching")
+        if password1 is None or password2 is None:
+            return Response(status=400)
+
+        # print(serializedClaimedUser)
+        # print(serializedUser)
+        # print(password1)
+        # print(password2)
+
+        # userId & token comes along with the reqest
+        # claimedUser is extracted from tokensTable using token
+        # userId is extracted using userId
+        if serializedClaimedUser.get('userid') != userId:
+            return Response(code=400)
+
+        try:
+            payload = jwt.decode(token, serializedUser.get(
+                'password'), algorithms=["HS256"])
+        except jwt.ExpiredSignatureError:
+            claimedUser.delete()
+            return Response(status=401)
+        except:
+            return Response(status=500)
+
+        # print(payload)
+
+        if payload.get('id') != serializedUser.get('id'):
+            return Response(status=400)
+
+        if password1 != password2:
+            return Response(status=401)
+
+        user.password = make_password(password1)
+        user.save()
+        claimedUser.delete()
 
         return Response({
-            'user': 'user'
+            'status': True
         })
 
     elif request.method == "GET":
         print(token)
         print(userId)
-        messages.error(request, "Password not matching")
-        return render(request, 'reset_password.html')
-
+        return render(request, 'reset_password.html', {"token": token, 'userId': userId})
+# payload = jwt.decode(refresh_token, 'secret', algorithms=["HS256"])
 # /api/resetpassword
 
 
@@ -177,7 +215,8 @@ def resetpasssord(request):
 @ api_view(["GET"])
 def test(request, testNo):
     print(testNo)
-    return Response()
+    return Response(status=400)
+
 # seperete this view
 # expected route - /api/logout not /api/auth/logout
 
