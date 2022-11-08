@@ -3,12 +3,15 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.contrib.auth.hashers import make_password, check_password
 from rest_framework.exceptions import AuthenticationFailed, NotFound
-from .models import User
+from .models import User, TokensTable
 from .serializers import UserSerializer, AuthUserSerializer
 from .decorators import login_required
 import jwt
 from .utils import send_passwordreset_email
 from django.db.models import Q
+from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib import messages
 # Create your views here.
 
 
@@ -110,42 +113,76 @@ def refresh(request):
     })
 
 
+# /api/auth/reset_password?userid=id&token=token
+# validate the token and reset otherwise throw the error
+
+@csrf_exempt
 @api_view(['POST', 'GET'])
-def reset_password(request):
+def reset_password(request, token, userId):
     if request.method == "POST":
-        username = request.data.get('username')
-        email = request.data.get('email')
+        # username = request.data.get('username')
+        # email = request.data.get('email')
 
-        user = User.objects.filter(
-            Q(username=username) | Q(email=email)).first()
-        if user is None:
-            raise NotFound(code=404)
+        # user = User.objects.filter(
+        #     Q(username=username) | Q(email=email)).first()
+        # if user is None:
+        #     raise NotFound(code=404)
 
-        serialized_user = UserSerializer(user).data
-        reset_token = user.getPasswordRefreshToken()
-        print(reset_token)
+        # serialized_user = UserSerializer(user).data
+        # reset_token = user.getPasswordRefreshToken()
+        # print(reset_token)
 
-        send_passwordreset_email(serialized_user.get('email'), reset_token)
+        # send_passwordreset_email(serialized_user.get('email'), reset_token)
+
+        print(request.POST.get('password1'))
+        print(request.POST.get('password2'))
+        # me = messages.error(request, "Password not matching")
+
         return Response({
-            'user': serialized_user
+            'user': 'user'
         })
+
     elif request.method == "GET":
-        return Response({
-            'response': 'success'
-        })
+        print(token)
+        print(userId)
+        messages.error(request, "Password not matching")
+        return render(request, 'reset_password.html')
+
+# /api/resetpassword
 
 
-@api_view(['GET'])
-def test(request):
+@ api_view(['GET'])
+def resetpasssord(request):
+    username = request.GET.get('username')
+    print(username)
+
+    user = User.objects.filter(Q(username=username)).first()
+    if user is None:
+        raise NotFound(code=404)
+
+    serialized_user = UserSerializer(user).data
+    reset_token = user.getPasswordRefreshToken()
+    print(reset_token)
+    token = TokensTable(userid=user.id, resetToken=reset_token)
+    token.save()
+    print(serialized_user.get('email'))
+
+    send_passwordreset_email(
+        serialized_user.get('email'), reset_token, user.id)
     return Response({
         'status': True
     })
 
 
+@ api_view(["GET"])
+def test(request, testNo):
+    print(testNo)
+    return Response()
 # seperete this view
 # expected route - /api/logout not /api/auth/logout
 
-@api_view(['GET'])
+
+@ api_view(['GET'])
 def logout(request):
     refresh_token = request.COOKIES.get('jwt_refresh_token')
     print(refresh_token)

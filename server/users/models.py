@@ -37,7 +37,16 @@ class User(models.Model):
             'exp': datetime.utcnow() + timedelta(minutes=30)
         }
         reset_token = jwt.encode(payload, self.password, algorithm="HS256")
+        # self.
         return reset_token
 
     def __str__(self):
         return self.username
+
+
+class TokensTable(models.Model):
+    userid = models.IntegerField(unique=True, null=True)
+    resetToken = models.TextField()
+
+    # def __str__(self):
+    #     return self.userid

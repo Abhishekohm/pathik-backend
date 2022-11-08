@@ -2,7 +2,7 @@ import smtplib
 from email.message import EmailMessage
 
 
-def send_passwordreset_email(user_mail, token):
+def send_passwordreset_email(user_mail, token, userid):
     msg = EmailMessage()
     msg['Subject'] = 'Password rest'
     msg['From'] = 'abhishek.9867.338961@gmail.com'
@@ -13,7 +13,7 @@ def send_passwordreset_email(user_mail, token):
     <html>
         <body>
             <h1 style="color:SlateGray;">Password Reset</h1>
-            <p>Click <a href="http://localhost:8000/auth/reset/?token={token}">here</a> to reset the password</p>
+            <p>Click <a href="http://localhost:8000/api/auth/reset/{token}/{userid}">here</a> to reset the password</p>
         </body>
     </html>
     """, subtype='html')
