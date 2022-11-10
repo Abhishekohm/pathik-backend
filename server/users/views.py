@@ -10,9 +10,13 @@ from rest_framework.exceptions import AuthenticationFailed, NotFound
 from rest_framework.response import Response
 
 from .decorators import login_required
-from .models import TokensTable, User
+from .models import Tokenstable, User
 from .serializers import AuthUserSerializer, TokenSerializer, UserSerializer
 from .utils import send_passwordreset_email
+
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.conf import settings
 
 # Create your views here.
 
@@ -129,7 +133,7 @@ def refresh(request):
 def reset_password(request, token, userId):
     if request.method == "POST":
         user = User.objects.filter(id=userId).first()
-        claimedUser = TokensTable.objects.filter(resetToken=token).first()
+        claimedUser = Tokenstable.objects.filter(resetToken=token).first()
 
         if user is None:
             raise NotFound(code=404)
@@ -151,7 +155,7 @@ def reset_password(request, token, userId):
         # print(password2)
 
         # userId & token comes along with the reqest
-        # claimedUser is extracted from tokensTable using token
+        # claimedUser is extracted from tokenstable using token
         # userId is extracted using userId
         if serializedClaimedUser.get('userid') != userId:
             return Response(code=400)
@@ -201,12 +205,24 @@ def resetpasssord(request):
     serialized_user = UserSerializer(user).data
     reset_token = user.getPasswordRefreshToken()
     print(reset_token)
-    token = TokensTable(userid=user.id, resetToken=reset_token)
+    token = Tokenstable(userid=user.id, resetToken=reset_token)
     token.save()
     print(serialized_user.get('email'))
 
-    send_passwordreset_email(
-        serialized_user.get('email'), reset_token, user.id)
+    context = {
+        'link': str("http://localhost:8000/api/auth/reset/" + str(reset_token) + "/" + str(user.id) + "/"),
+    }
+    print(context)
+
+    msg_plain = render_to_string('email.txt')
+    msg_html = render_to_string('email.html', {'context': context})
+
+    send_mail("Password reset request",
+              msg_plain,
+              settings.EMAIL_HOST_USER,
+              [serialized_user.get('email')],
+              html_message=msg_html)
+
     return Response({
         'status': True
     })
