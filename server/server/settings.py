@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 import environ
+import cloudinary_storage
 
 # Initialise environment variables
 env = environ.Env()
@@ -49,6 +50,9 @@ INSTALLED_APPS = [
     'locations',
     'rest_framework',
     'tickets',
+    'payment',
+    'cloudinary',
+    'cloudinary_storage',
 ]
 
 MIDDLEWARE = [
@@ -66,7 +70,7 @@ ROOT_URLCONF = 'server.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -143,3 +147,24 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+#Instamojo
+API_KEY = env('API_PRIVATE_KEY')
+AUTH_TOKEN = env('AUTH_PRIVATE_TOKEN')
+INSTAMOJO_SALT = env('PRIVATE_SALT')
+
+
+#Cloudinary
+CLOUDINARY_API_KEY = env('api_key')
+CLOUDINARY_API_SECRET = env('api_secret')
+CLOUDINARY_CLOUD_NAME = env('cloud_name')
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': CLOUDINARY_CLOUD_NAME,
+    'API_KEY': CLOUDINARY_API_KEY,
+    'API_SECRET': CLOUDINARY_API_SECRET,
+    'secure': True,
+}
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
