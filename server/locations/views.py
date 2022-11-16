@@ -37,7 +37,7 @@ def newLocation(request):
 
             messages.success(
                 request, "Location details have been submitted. We will verify and get back on the email of the Admin.")
-            return render(request, 'users/locationform.html')
+            return render(request, 'locationform.html')
 
     else:
-        return render(request, 'users/locationform.html')
+        return render(request, 'locationform.html')
