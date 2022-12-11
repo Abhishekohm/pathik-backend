@@ -10,6 +10,7 @@ from django.conf import settings
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
+from users.utils import send_qrcode
 
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
@@ -69,6 +70,8 @@ def completePayment(request):
                   settings.EMAIL_HOST_USER,
                   [user.email],
                   html_message=msg_html)
+
+        # send_qrcode(user.email, link)
 
         #Rendering successfull payment page
         return render(request, 'success.html')
