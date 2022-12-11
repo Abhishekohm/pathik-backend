@@ -20,7 +20,7 @@ def newLocation(request):
         if (adminFlag == False):
             messages.error(
                 request, "The username provided does not exist. Please enter correct UserName.")
-            return render(request, 'users/locationform.html')
+            return render(request, 'locationform.html')
         else:
             admin = User.objects.get(username=adminusername)
             images = request.FILES.get('locationImg')
@@ -41,3 +41,9 @@ def newLocation(request):
 
     else:
         return render(request, 'locationform.html')
+
+
+@api_view(['GET'])
+def viewLoc(request):
+    loc = Location.objects.all()
+    return render(request, 'index.html', {'locations': loc})
