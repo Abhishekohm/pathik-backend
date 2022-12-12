@@ -1,5 +1,12 @@
-# Pathik
-The guide for a tourist to visit places on National Importance.
+
+
+
+<h1 align="center">
+  <a href="https://github.com/Abhishekohm/Edison-Production.git">
+    <img src="https://res.cloudinary.com/dm6gcyihe/image/upload/v1670822779/pathik_wnganr.jpg" alt="GE Healthcare" width="400" height="350">
+  </a>
+</h1>
+<h3>The guide for a tourist to visit places on National Importance.</h3>
 
 ## Tech Stack
 
@@ -27,6 +34,61 @@ alt="drawing" width="100"/> <img
 src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Cloudinary_logo.svg/2560px-Cloudinary_logo.svg.png"
 alt="drawing" width="100"/>
 
+## 🔗 Links
+
+- GitHub repo link: [Link to repository](https://github.com/Abhishekohm/pathik-backend)
+
+## Getting Started
+
+Assuming you have git, follow the following process
+1. Clone the Git Repo:
+   ```
+   $ git clone https://github.com/Abhishekohm/pathik-backend.git
+   ```
+2. Go into the Repo directory
+   ```
+   $ cd pathik-backend
+   ```
+3. Setup .env with the help of .env.example file in server app
+   ```
+   # Sender email address
+   EMAIL_HOST_USER=SENDER_EMAIL
+   EMAIL_HOST_PASSWORD=SENDER_EMAIL_APP_PASSWORD
+
+   # Postgre-Password
+   DB_PASSWORD=POSTRGRE_PASSWORD
+
+   # Your django key
+   SECRET_KEY=DJANGO_SECRET_KEY
+
+   # Instamojo Credentials 
+   API_PRIVATE_KEY=INSTAMOJO_PRIVATE_API_KEY
+   AUTH_PRIVATE_TOKEN=INSTAMOJO_PRIVATE_AUTH_TOKEN
+   PRIVATE_SALT=INSTAMOJO_PRIVATE_SALT
+
+   # All of this is available on cloudinary dashboard
+   cloud_name=CLOUDINARY_CLOUD_NAME
+   api_key=CLOUDINARY_API_KEY
+   api_secret=CLOUDINARY_API_SECRET
+
+   CLOUDINARY_URL=CLOUDINARY_URL
+   ```
+3. Install all the dependencies
+   ```
+   $ pip install -r requirements.txt
+   ```
+4. Go into the server
+   ```
+   $ cd server
+   ```
+5. Start the server
+   ```
+   $ python manage.py
+   ```
+6. Open the website 
+   ```
+   $ go to http://localhost:8000/
+   ```
 
 
 https://user-images.githubusercontent.com/84727394/206928593-9d060488-8108-40e8-bd02-5252365c1074.mp4
