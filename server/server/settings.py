@@ -90,13 +90,25 @@ BASE_DIR = "D:\pathik-backend\server"
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': 'Pathik',
+#         'USER': 'postgres',
+#         'PASSWORD': env('DB_PASSWORD'),
+#         'HOST': 'localhost',
+#         'PORT': '5432',
+#     }
+# }
+
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'Pathik',
-        'USER': 'postgres',
-        'PASSWORD': env('DB_PASSWORD'),
-        'HOST': 'localhost',
+        'NAME': 'frgfyenc',
+        'USER': 'frgfyenc',
+        'PASSWORD': 'cRZy1WjzQnDnV-rbYj9f1o9jzXRIjf6h',
+        'HOST': 'satao.db.elephantsql.com',
         'PORT': '5432',
     }
 }

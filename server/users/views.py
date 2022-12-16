@@ -81,9 +81,13 @@ def register(request):
             instance.password = make_password(password)
             instance.save()
         except IntegrityError:
-            return Response(status=406)
+            messages.warning(
+                request, "Email or Username already exist ")
+            return render(request, 'register.html')
         except:
-            return Response(status=500)
+            messages.error(
+                request, "Some error occured please try again.")
+            return render(request, 'register.html')
 
         user = UserSerializer(instance).data
         access_token = instance.getAccessToken()
