@@ -10,7 +10,7 @@ from rest_framework.exceptions import AuthenticationFailed, NotFound
 from rest_framework.response import Response
 from locations.models import Location
 from django.shortcuts import redirect
-from locations.views import viewLoc
+# from locations.views import viewLoc
 
 from .decorators import login_required
 from .models import Tokenstable, User
@@ -31,20 +31,24 @@ def login(request):
         password = request.data.get('password')
         # print(username, password)
         if username is None or password is None:
-            raise AuthenticationFailed(code=401)
+            messages.error(
+                request, "Empty Fields.Try again")
+            return render(request, 'login.html')
 
         user = User.objects.filter(username=username).first()
         if user is None:
-            raise NotFound(code=404)
+            messages.error(
+                request, "User not found.")
+            return render(request, 'login.html')
 
         instance = user
         user = AuthUserSerializer(user).data
 
         # checking password
         if check_password(password, user.get('password')) == False:
-            return Response({
-                'message': 'username or password is incorrect'
-            }, status=401)
+            messages.error(
+                request, "Username or password is incorrect.")
+            return render(request, 'login.html')
 
         # generating tokens
         access_token = instance.getAccessToken()
@@ -157,10 +161,14 @@ def reset_password(request, token, userId):
         password2 = request.POST.get('password2')
 
         if password1 is None or password2 is None:
-            return Response(status=400)
+            messages.warning(
+                request, "Fields are empty. Please enter your new Password")
+            return render(request, 'reset_password.html', {"token": token, 'userId': userId})
 
         if serializedClaimedUser.get('userid') != userId:
-            return Response(code=400)
+            messages.error(
+                request, "Unauthorized access.")
+            return render(request, 'reset_password.html', {"token": token, 'userId': userId})
 
         try:
             payload = jwt.decode(token, serializedUser.get(
@@ -174,18 +182,21 @@ def reset_password(request, token, userId):
         # print(payload)
 
         if payload.get('id') != serializedUser.get('id'):
-            return Response(status=400)
+            messages.error(
+                request, "Unauthorized access.")
+            return render(request, 'reset_password.html', {"token": token, 'userId': userId})
 
         if password1 != password2:
-            return Response(status=401)
+            messages.error(
+                request, "Password dont match.Try again")
+            return render(request, 'reset_password.html', {"token": token, 'userId': userId})
 
         user.password = make_password(password1)
         user.save()
         claimedUser.delete()
-
-        return Response({
-            'status': True
-        })
+        messages.success(
+            request, "Password Changed successfully. Please login in.")
+        return redirect('login')
 
     elif request.method == "GET":
         print(token)
@@ -203,13 +214,28 @@ def resetpasssord(request):
 
         user = User.objects.filter(Q(username=username)).first()
         if user is None:
-            raise NotFound(code=404)
+            messages.error(
+                request, "User not found.")
+            return render(request, 'forgot-pass.html')
 
         serialized_user = UserSerializer(user).data
         reset_token = user.getPasswordRefreshToken()
         print(reset_token)
         token = Tokenstable(userid=user.id, resetToken=reset_token)
-        token.save()
+        try:
+            tempToken = Tokenstable.objects.get(userid=user.id)
+            print(tempToken)
+            if tempToken is not None:
+                messages.warning(
+                    request, "Reset link has already been sent")
+                return render(request, 'forgot-pass.html')
+            else:
+                token.save()
+        except Exception as e:
+            token.save()
+
+
+
         print(serialized_user.get('email'))
 
         context = {
@@ -230,9 +256,9 @@ def resetpasssord(request):
         # send_passwordreset_email(
         #     serialized_user.get('email'), reset_token, user.id)
 
-        return Response({
-            'status': True
-        })
+        messages.success(
+            request, "Reset link has been sent to your registered email.")
+        return render(request, 'forgot-pass.html')
     else:
         return render(request, 'forgot-pass.html')
 
