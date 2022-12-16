@@ -84,7 +84,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'server.wsgi.application'
 
-BASE_DIR = "D:\pathik-backend\server"
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # Database
@@ -93,10 +93,10 @@ BASE_DIR = "D:\pathik-backend\server"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'Pathik',
-        'USER': 'postgres',
-        'PASSWORD': env('DB_PASSWORD'),
-        'HOST': 'localhost',
+        'NAME': 'frgfyenc',
+        'USER': 'frgfyenc',
+        'PASSWORD': 'cRZy1WjzQnDnV-rbYj9f1o9jzXRIjf6h',
+        'HOST': 'satao.db.elephantsql.com',
         'PORT': '5432',
     }
 }
@@ -150,13 +150,13 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-#Instamojo
+# Instamojo
 API_KEY = env('API_PRIVATE_KEY')
 AUTH_TOKEN = env('AUTH_PRIVATE_TOKEN')
 INSTAMOJO_SALT = env('PRIVATE_SALT')
 
 
-#Cloudinary
+# Cloudinary
 CLOUDINARY_API_KEY = env('api_key')
 CLOUDINARY_API_SECRET = env('api_secret')
 CLOUDINARY_CLOUD_NAME = env('cloud_name')
