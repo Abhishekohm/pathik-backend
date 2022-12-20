@@ -28,8 +28,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 
 SECRET_KEY = env('SECRET_KEY')
-RAZORPAY_SECRET_KEY = env('RAZORPAY_SECRET_ID')
-RAZORPAY_PUBLIC_KEY = env('RAZORPAY_PUBLIC_ID')
+# RAZORPAY_SECRET_KEY = env('RAZORPAY_SECRET_ID')
+# RAZORPAY_PUBLIC_KEY = env('RAZORPAY_PUBLIC_ID')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -149,13 +149,13 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-#Instamojo
+# Instamojo
 API_KEY = env('API_PRIVATE_KEY')
 AUTH_TOKEN = env('AUTH_PRIVATE_TOKEN')
 INSTAMOJO_SALT = env('PRIVATE_SALT')
 
 
-#Cloudinary
+# Cloudinary
 CLOUDINARY_API_KEY = env('api_key')
 CLOUDINARY_API_SECRET = env('api_secret')
 CLOUDINARY_CLOUD_NAME = env('cloud_name')

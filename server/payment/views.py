@@ -10,6 +10,7 @@ from django.conf import settings
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
+# from users.utils import send_qrcode
 
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
@@ -49,11 +50,13 @@ def completePayment(request):
 
         # Creating a payment response for QRcode
         payment_response = {
-            'user_id': user.id,
-            'ticket_id': ticket.id,
-            'quantity': ticket.quantity,
-            'order_id': payment_request_id,
-            'payment_id': payment_id,
+            # 'user_id': user.id,
+            # 'ticket_id': ticket.id,
+            # 'quantity': ticket.quantity,
+            # 'order_id': payment_request_id,
+            # 'payment_id': payment_id,
+            'ID': payment.ID,
+
         }
 
         # Using a API for QR code generation
@@ -70,7 +73,9 @@ def completePayment(request):
                   [user.email],
                   html_message=msg_html)
 
-        #Rendering successfull payment page
+        # send_qrcode(user.email, link)
+
+        # Rendering successfull payment page
         return render(request, 'success.html')
     else:
         return HttpResponse("Sone error occured. Payment not successful any money deducted will be refunded within 24hrs")

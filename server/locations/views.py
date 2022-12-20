@@ -8,6 +8,8 @@ from .models import Location
 # from .forms import locationForm
 # Create your views here.
 
+# remove GET request
+
 
 @api_view(['GET', 'POST'])
 def newLocation(request):

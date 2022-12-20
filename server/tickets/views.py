@@ -11,7 +11,7 @@ from django.conf import settings
 # Create your views here.
 from instamojo_wrapper import Instamojo
 
-
+# remove GET request
 @api_view(['GET', 'POST'])
 def bookTicket(request):
     if request.method == "POST":
@@ -20,7 +20,7 @@ def bookTicket(request):
             'location': Location.objects.get(name=request.POST.get('location')).pk,
             'date': request.POST.get('date'),
             'quantity': request.POST.get('quantity'),
-            'amount': request.POST.get('amount'),
+            # 'amount': request.POST.get('amount'),
         })
         ticket = TicketSerializer(data=data)
         if ticket.is_valid():
@@ -30,7 +30,65 @@ def bookTicket(request):
             location = Location.objects.get(name=request.POST.get('location'))
             date = request.POST.get('date')
             quantity = request.POST.get('quantity')
-            amount = request.POST.get('amount')
+            # amount = request.POST.get('amount')
+            amount = int(quantity)*40
+            print(amount)
+
+            # Creating Instamojo Client and Order id
+            client = Instamojo(api_key=settings.API_KEY, auth_token=settings.AUTH_TOKEN,
+                               endpoint='https://test.instamojo.com/api/1.1/')
+
+            payment_response = client.payment_request_create(
+                amount=amount,
+                purpose='Buying a ticket',
+                buyer_name=user.username,
+                email=user.email,
+                send_email=True,
+                redirect_url='http://localhost:8000/api/payment/paymentstatus/',
+                allow_repeated_payments=False,
+            )
+            print(payment_response)
+            order_id = payment_response['payment_request']['id']
+            tempTicket = Ticket.objects.get_or_create(user=user, location=location,
+                                                      date=date, quantity=quantity, amount=amount, payment_id=order_id)
+
+            return render(request, 'form.html', {'payment_url': payment_response['payment_request']['longurl'], 'button': "hide-button", 'field': "disable-field"})
+
+        return Response(ticket.errors)
+    else:
+        print("here")
+        print(request.GET)
+        id = request.GET.get("locationID")
+        print(id)
+        if id is None:
+            return render(request, 'form.html', {'button': "", 'field': ""})
+        else:
+            location = Location.objects.get(id=request.GET.get("locationID"))
+            return render(request, 'form.html', {"locationName": location.name, 'button': "", 'field': ""})
+        # return render(request, 'form.html', {'button': "", 'field': ""})
+
+# remove GET request
+@api_view(['GET', 'POST'])
+def book_Ticket(request, locationID):
+    if request.method == "POST":
+        data = ({
+            'user': User.objects.get(username=request.POST.get('user')).pk,
+            'location': Location.objects.get(name=request.POST.get('location')).pk,
+            'date': request.POST.get('date'),
+            'quantity': request.POST.get('quantity'),
+            # 'amount': request.POST.get('amount'),
+        })
+        ticket = TicketSerializer(data=data)
+        if ticket.is_valid():
+            # ticket.save()
+            # Getting all the items from the frontend after validation
+            user = User.objects.get(username=request.POST.get('user'))
+            location = Location.objects.get(name=request.POST.get('location'))
+            date = request.POST.get('date')
+            quantity = request.POST.get('quantity')
+            # amount = request.POST.get('amount')
+            amount = int(quantity)*40
+            print(amount)
 
             # Creating Instamojo Client and Order id
             client = Instamojo(api_key=settings.API_KEY, auth_token=settings.AUTH_TOKEN,
@@ -49,8 +107,14 @@ def bookTicket(request):
             tempTicket = Ticket.objects.get_or_create(user=user, location=location,
                                                       date=date, quantity=quantity, amount=amount, payment_id=order_id)
 
-            return render(request, 'payment.html', {'payment_url': payment_response['payment_request']['longurl']})
+            return render(request, 'form.html', {'payment_url': payment_response['payment_request']['longurl'], 'button': "hide-button", 'field': "disable-field"})
 
         return Response(ticket.errors)
     else:
-        return render(request, 'form.html')
+        if locationID is None:
+            return render(request, 'form.html', {'button': "", 'field': ""})
+        else:
+            location = Location.objects.get(pk=locationID)
+            print(location)
+            return render(request, 'form.html', {"locationName": str(location.name), 'button': "", 'field': ""})
+        # return render(request, 'form.html', {'button': "", 'field': ""})

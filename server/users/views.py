@@ -128,6 +128,7 @@ def refresh(request):
 # /api/auth/reset_password?userid=id&token=token
 # validate the token and reset otherwise throw the error
 
+# after succes redirect to /login
 @csrf_exempt
 @api_view(['POST', 'GET'])
 def reset_password(request, token, userId):

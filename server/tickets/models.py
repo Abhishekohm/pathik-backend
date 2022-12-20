@@ -17,7 +17,7 @@ class Ticket(models.Model):
     )
     amount = models.IntegerField(default=0)
     payment_id = models.CharField(
-        max_length=100, default='sbcsndicjasidnckasbndckasndciuj')
+        max_length=100)
     paid = models.BooleanField(default=False)
 
     def __str__(self) -> str:
