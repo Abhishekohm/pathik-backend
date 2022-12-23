@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 import jwt
 from django.db import models
-
+from django.conf import settings
 # Create your models here.
 
 
@@ -19,7 +19,8 @@ class User(models.Model):
             'exp': datetime.utcnow() + timedelta(minutes=30)
         }
         # create a environment variable for secret
-        jwt_token = jwt.encode(payload, 'secret', algorithm="HS256")
+        jwt_token = jwt.encode(
+            payload, settings.SECRET_TOKEN_KEY, algorithm=settings.ALGORITHM)
         return jwt_token
 
     def getRefreshToken(self):
@@ -27,7 +28,8 @@ class User(models.Model):
             'id': self.id,
             'exp': datetime.utcnow() + timedelta(days=7)
         }
-        jwt_token = jwt.encode(payload, 'secret', algorithm="HS256")
+        jwt_token = jwt.encode(
+            payload, settings.SECRET_TOKEN_KEY, algorithm=settings.ALGORITHM)
         self.refreshToken = jwt_token
         self.save()
         return jwt_token
@@ -37,7 +39,8 @@ class User(models.Model):
             'id': self.id,
             'exp': datetime.utcnow() + timedelta(minutes=15)
         }
-        reset_token = jwt.encode(payload, self.password, algorithm="HS256")
+        reset_token = jwt.encode(
+            payload, self.password, algorithm=settings.ALGORITHM)
         # self.
         return reset_token
 
@@ -49,5 +52,6 @@ class Tokenstable(models.Model):
     userid = models.IntegerField(unique=True, null=False, default=2)
     resetToken = models.TextField()
 
-    # def __str__(self):
-    #     return self.userid
+    def __str__(self):
+        user = User.objects.get(pk=self.userid)
+        return user.username

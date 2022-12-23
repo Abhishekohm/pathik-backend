@@ -14,7 +14,7 @@ class Location(models.Model):
     description = models.CharField(max_length=1500, null=False)
     admin = models.ForeignKey(User, on_delete=models.CASCADE)
     images = models.ImageField(upload_to=image_directory_path, max_length=100)
-    status = models.BooleanField(null=False)
+    status = models.BooleanField(null=False, default=False)
 
     def __str__(self) -> str:
         return self.name

@@ -3,4 +3,9 @@ from .models import Payment
 
 # Register your models here.
 
-admin.site.register(Payment)
+
+class PaymentAdmin(admin.ModelAdmin):
+    readonly_fields = ['ID']
+
+
+admin.site.register(Payment, PaymentAdmin)

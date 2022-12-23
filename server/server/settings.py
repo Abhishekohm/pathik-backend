@@ -28,8 +28,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 
 SECRET_KEY = env('SECRET_KEY')
-# RAZORPAY_SECRET_KEY = env('RAZORPAY_SECRET_ID')
-# RAZORPAY_PUBLIC_KEY = env('RAZORPAY_PUBLIC_ID')
+SECRET_TOKEN_KEY = env('SECRET_TOKEN_KEY')
+
+ALGORITHM = env('ALGORITHM')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -167,4 +168,4 @@ CLOUDINARY_STORAGE = {
     'secure': True,
 }
 
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+DEFAULT_FILE_STORAGE = env('DEFAULT_FILE_STORAGE')

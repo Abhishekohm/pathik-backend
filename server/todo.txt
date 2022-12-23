@@ -11,3 +11,5 @@
 4.  from ticket
     remove bookTicket.html
 
+5.  check for the status code once around line 189 in users.views.py
+

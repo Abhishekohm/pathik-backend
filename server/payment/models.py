@@ -11,3 +11,6 @@ class Payment(models.Model):
     payment_id = models.CharField(max_length=150)
     ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE)
     response = models.TextField()
+
+    def __str__(self) -> str:
+        return str(self.ID)

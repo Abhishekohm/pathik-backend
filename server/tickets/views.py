@@ -6,110 +6,140 @@ from users.models import User
 from locations.models import Location
 from .serializers import TicketSerializer
 from .models import Ticket
+from users.decorators import login_required
 from django.conf import settings
+from django.core.serializers.json import DjangoJSONEncoder
+import json
 
 # Create your views here.
 from instamojo_wrapper import Instamojo
 
 # remove GET request
+
+
 @api_view(['GET', 'POST'])
 def bookTicket(request):
     if request.method == "POST":
-        data = ({
-            'user': User.objects.get(username=request.POST.get('user')).pk,
-            'location': Location.objects.get(name=request.POST.get('location')).pk,
-            'date': request.POST.get('date'),
-            'quantity': request.POST.get('quantity'),
-            # 'amount': request.POST.get('amount'),
-        })
-        ticket = TicketSerializer(data=data)
-        if ticket.is_valid():
-            # ticket.save()
-            # Getting all the items from the frontend after validation
+        try:
             user = User.objects.get(username=request.POST.get('user'))
             location = Location.objects.get(name=request.POST.get('location'))
-            date = request.POST.get('date')
-            quantity = request.POST.get('quantity')
-            # amount = request.POST.get('amount')
-            amount = int(quantity)*40
-            print(amount)
+            data = ({
+                'user': user.pk,
+                'location': location.pk,
+                'date': request.POST.get('date'),
+                'quantity': request.POST.get('quantity'),
+                'amount': request.POST.get('amount'),
+            })
+        except Exception as e:
+            return Response({
+                'detail': str(e)
+            }, status=400)
 
-            # Creating Instamojo Client and Order id
-            client = Instamojo(api_key=settings.API_KEY, auth_token=settings.AUTH_TOKEN,
-                               endpoint='https://test.instamojo.com/api/1.1/')
+        ticket = TicketSerializer(data=data)
+        if ticket.is_valid():
+            # Getting all the items from the frontend after validation
+            data = ({
+                'user': user,
+                'location': location,
+                'date': data['date'],
+                'quantity': data['quantity'],
+                'amount': data['amount'],
+            })
+            print(data['amount'], " ", data['user'])
 
-            payment_response = client.payment_request_create(
-                amount=amount,
-                purpose='Buying a ticket',
-                buyer_name=user.username,
-                email=user.email,
-                send_email=True,
-                redirect_url='http://localhost:8000/api/payment/paymentstatus/',
-                allow_repeated_payments=False,
-            )
-            print(payment_response)
-            order_id = payment_response['payment_request']['id']
-            tempTicket = Ticket.objects.get_or_create(user=user, location=location,
-                                                      date=date, quantity=quantity, amount=amount, payment_id=order_id)
+            try:
+                # Creating Instamojo Client and Order id
+                client = Instamojo(api_key=settings.API_KEY, auth_token=settings.AUTH_TOKEN,
+                                   endpoint='https://test.instamojo.com/api/1.1/')
 
-            return render(request, 'form.html', {'payment_url': payment_response['payment_request']['longurl'], 'button': "hide-button", 'field': "disable-field"})
+                payment_response = client.payment_request_create(
+                    amount=data['amount'],
+                    purpose='Buying a ticket',
+                    buyer_name=data['user'].username,
+                    email=data['user'].email,
+                    send_email=True,
+                    redirect_url='http://localhost:8000/api/payment/paymentstatus/',
+                    allow_repeated_payments=False,
+                )
+                print(payment_response)
+                order_id = payment_response['payment_request']['id']
+                tempTicket = Ticket.objects.get_or_create(user=data['user'], location=data['location'],
+                                                          date=data['date'], quantity=data['quantity'], amount=data['amount'], payment_id=order_id)
+            except Exception as e:
+                return Response({
+                    'detail': str(e)
+                }, status=500)
 
-        return Response(ticket.errors)
+            return Response({
+                'detail': "Successfully payment link generated."
+            }, status=200)
+            # return render(request, 'form.html', {'payment_url': payment_response['payment_request']['longurl'], 'button': "hide-button", 'field': "disable-field"})
+
+        return Response({
+            'detail': ticket.errors
+        }, status=400)
     else:
-        print("here")
-        print(request.GET)
-        id = request.GET.get("locationID")
-        print(id)
-        if id is None:
-            return render(request, 'form.html', {'button': "", 'field': ""})
-        else:
-            location = Location.objects.get(id=request.GET.get("locationID"))
-            return render(request, 'form.html', {"locationName": location.name, 'button': "", 'field': ""})
-        # return render(request, 'form.html', {'button': "", 'field': ""})
+        pass
 
-# remove GET request
+
 @api_view(['GET', 'POST'])
 def book_Ticket(request, locationID):
     if request.method == "POST":
-        data = ({
-            'user': User.objects.get(username=request.POST.get('user')).pk,
-            'location': Location.objects.get(name=request.POST.get('location')).pk,
-            'date': request.POST.get('date'),
-            'quantity': request.POST.get('quantity'),
-            # 'amount': request.POST.get('amount'),
-        })
-        ticket = TicketSerializer(data=data)
-        if ticket.is_valid():
-            # ticket.save()
-            # Getting all the items from the frontend after validation
+        try:
             user = User.objects.get(username=request.POST.get('user'))
             location = Location.objects.get(name=request.POST.get('location'))
-            date = request.POST.get('date')
-            quantity = request.POST.get('quantity')
-            # amount = request.POST.get('amount')
-            amount = int(quantity)*40
-            print(amount)
+            data = ({
+                'user': user.pk,
+                'location': location.pk,
+                'date': request.POST.get('date'),
+                'quantity': request.POST.get('quantity'),
+                'amount': request.POST.get('amount'),
+            })
+        except Exception as e:
+            return Response({
+                'detail': str(e)
+            }, status=400)
 
-            # Creating Instamojo Client and Order id
-            client = Instamojo(api_key=settings.API_KEY, auth_token=settings.AUTH_TOKEN,
-                               endpoint='https://test.instamojo.com/api/1.1/')
+        ticket = TicketSerializer(data=data)
+        if ticket.is_valid():
+            # Getting all the items from the frontend after validation
+            data = ({
+                'user': user,
+                'location': location,
+                'date': data['date'],
+                'quantity': data['quantity'],
+                'amount': data['amount'],
+            })
+            print(data['amount'], " ", data['user'])
 
-            payment_response = client.payment_request_create(
-                amount=amount,
-                purpose='Buying a ticket',
-                buyer_name=user.username,
-                email=user.email,
-                send_email=True,
-                redirect_url='http://localhost:8000/api/payment/paymentstatus/'
-            )
-            print(payment_response)
-            order_id = payment_response['payment_request']['id']
-            tempTicket = Ticket.objects.get_or_create(user=user, location=location,
-                                                      date=date, quantity=quantity, amount=amount, payment_id=order_id)
+            try:
+                # Creating Instamojo Client and Order id
+                client = Instamojo(api_key=settings.API_KEY, auth_token=settings.AUTH_TOKEN,
+                                   endpoint='https://test.instamojo.com/api/1.1/')
+
+                payment_response = client.payment_request_create(
+                    amount=data['amount'],
+                    purpose='Buying a ticket',
+                    buyer_name=data['user'].username,
+                    email=data['user'].email,
+                    send_email=True,
+                    redirect_url='http://localhost:8000/api/payment/paymentstatus/',
+                    allow_repeated_payments=False,
+                )
+                print(payment_response)
+                order_id = payment_response['payment_request']['id']
+                tempTicket = Ticket.objects.get_or_create(user=data['user'], location=data['location'],
+                                                          date=data['date'], quantity=data['quantity'], amount=data['amount'], payment_id=order_id)
+            except Exception as e:
+                return Response({
+                    'detail': str(e)
+                }, status=500)
 
             return render(request, 'form.html', {'payment_url': payment_response['payment_request']['longurl'], 'button': "hide-button", 'field': "disable-field"})
 
-        return Response(ticket.errors)
+        return Response({
+            'detail': ticket.errors
+        }, status=400)
     else:
         if locationID is None:
             return render(request, 'form.html', {'button': "", 'field': ""})
@@ -117,4 +147,16 @@ def book_Ticket(request, locationID):
             location = Location.objects.get(pk=locationID)
             print(location)
             return render(request, 'form.html', {"locationName": str(location.name), 'button': "", 'field': ""})
-        # return render(request, 'form.html', {'button': "", 'field': ""})
+
+
+
+@api_view(['GET'])
+@login_required
+def index(request):
+    print(request.headers)
+    print(request.user)
+    tickets = Ticket.objects.filter(user=request.user).values()[:]
+    print(list(tickets))
+    return Response({
+        'detail': json.dumps(list(tickets), cls=DjangoJSONEncoder)
+    }, status=200)
